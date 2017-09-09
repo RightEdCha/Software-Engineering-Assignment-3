@@ -9,26 +9,19 @@ var fs = require('fs'),
     Listing = require('./ListingSchema.js'),
     config = require('./config');
 
-
+var listingData;
 
 /* Connect to your database */
-mongoose.connect(config, function(err, db) {
-  if (err)
-    return console.log(err);
-});
+mongoose.connect(config.db.uri,{ useMongoClient: true });
 /*
   Instantiate a mongoose model for each listing object in the JSON file,
   and then save it to your Mongo database
  */
- Listing.collection.insertMany(fs.readFile('listings.json', 'utf8', function(err, data) {
+ fs.readFile('listings.json', 'utf8', function(err, data) {
     if (err) throw err;
     listingData = JSON.parse(data);
- }),
- function(err,request){
-    assert.equal(null, err);
-    assert.equal(3,request.insertedCount);
 
-    db.close
+    Listing.collection.insert(listingData.entries);
  });
 
 /*
